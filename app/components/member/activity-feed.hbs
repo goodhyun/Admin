@@ -1,7 +1,7 @@
 {{#let (members-event-fetcher filter=(members-event-filter member=@member.id) pageSize=5) as |eventsFetcher|}}
     {{#if eventsFetcher.data}}<h4 class="gh-main-section-header small bn">Activity</h4>{{/if}}
     <div class="gh-main-section-content grey {{if eventsFetcher.data "" "mt8"}}">
-        <div class="gh-member-feed {{if eventsFetcher.data "" "gh-member-feed-no-data"}}" ...attributes>
+        <div class="gh-member-feed gh-member-feed-labs {{if eventsFetcher.data "" "gh-member-feed-no-data"}}" ...attributes>
             <div class="flex-auto flex flex-column items-stretch {{if eventsFetcher.data "justify-between" "h-100 justify-center"}}">
                 <div>
                     {{#if eventsFetcher.isLoading}}
