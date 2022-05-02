@@ -20,9 +20,15 @@ export default class EmailPreviewModal extends Component {
     @service config;
     @service ghostPaths;
     @service settings;
+    @service store;
+
+    static modalOptions = {
+        className: 'fullscreen-modal-full-overlay fullscreen-modal-email-preview'
+    };
 
     @tracked tab = 'desktop';
     @tracked subject = null;
+    @tracked newsletter = null;
 
     // cached to avoid re-fetching when changing tabs
     html = null;
@@ -48,6 +54,19 @@ export default class EmailPreviewModal extends Component {
     async _fetchEmailData() {
         let {html, subject} = this;
 
+        // Fetch newsletter
+        if (!this.newsletter && this.args.data.newsletterId) {
+            const newsletters = (await this.store.query('newsletter', {filter: 'status:active+id:' + this.args.data.newsletterId, limit: 1})).toArray();
+            const defaultNewsletter = newsletters[0];
+            this.newsletter = defaultNewsletter;   
+        }
+            
+        if (!this.newsletter) {
+            const newsletters = (await this.store.query('newsletter', {filter: 'status:active', limit: 1})).toArray();
+            const defaultNewsletter = newsletters[0];
+            this.newsletter = defaultNewsletter;    
+        }
+
         if (html && subject) {
             return;
         }
@@ -62,7 +81,7 @@ export default class EmailPreviewModal extends Component {
             subject = this.args.data.email.subject;
         // data is a post? try fetching email preview
         } else {
-            let url = this.ghostPaths.url.api('/email_preview/posts', this.args.data.id);
+            let url = this.ghostPaths.url.api('/email_previews/posts', this.args.data.id);
             let response = await this.ajax.request(url);
             let [emailPreview] = response.email_previews;
             html = emailPreview.html;

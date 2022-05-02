@@ -1,11 +1,14 @@
+import ConfirmEditorLeaveModal from '../components/modals/editor/confirm-leave';
 import Controller, {inject as controller} from '@ember/controller';
+import DeletePostModal from '../components/modals/delete-post';
 import PostModel from 'ghost-admin/models/post';
+import PostPreviewModal from '../components/modals/post-preview';
 import boundOneWay from 'ghost-admin/utils/bound-one-way';
 import classic from 'ember-classic-decorator';
 import config from 'ghost-admin/config/environment';
 import isNumber from 'ghost-admin/utils/isNumber';
 import moment from 'moment';
-import {action, computed, get} from '@ember/object';
+import {action, computed} from '@ember/object';
 import {alias, mapBy} from '@ember/object/computed';
 import {capitalize} from '@ember/string';
 import {dropTask, enqueueTask, restartableTask, task, taskGroup, timeout} from 'ember-concurrency';
@@ -262,10 +265,8 @@ export default class EditorController extends Controller {
     @action
     openDeletePostModal() {
         if (!this.get('post.isNew')) {
-            this.modals.open('modals/delete-post', {
+            this.modals.open(DeletePostModal, {
                 post: this.post
-            }, {
-                className: 'fullscreen-modal fullscreen-modal-action fullscreen-modal-wide'
             });
         }
     }
@@ -283,15 +284,11 @@ export default class EditorController extends Controller {
 
     @action
     openPostPreviewModal() {
-        this.modals.open('modals/post-preview', {
+        this.modals.open(PostPreviewModal, {
             post: this.post,
             saveTask: this.saveTask,
             hasDirtyAttributes: this.hasDirtyAttributes,
-            // TODO: update to call action method directly when switching to class syntax
-            setEditorSaveType: this.actions.setSaveType.bind(this),
-            memberCount: this.memberCount
-        }, {
-            className: 'fullscreen-modal fullscreen-modal-full-overlay fullscreen-modal-email-preview'
+            setEditorSaveType: this.setSaveType
         });
     }
 
@@ -503,7 +500,10 @@ export default class EditorController extends Controller {
             let isPublishing = status === 'published' && !this.post.isPublished;
             let isScheduling = status === 'scheduled' && !this.post.isScheduled;
             if (options.sendEmailWhenPublished && (isPublishing || isScheduling)) {
-                options.adapterOptions = Object.assign({}, options.adapterOptions, {sendEmailWhenPublished: options.sendEmailWhenPublished});
+                options.adapterOptions = Object.assign({}, options.adapterOptions, {
+                    sendEmailWhenPublished: options.sendEmailWhenPublished,
+                    newsletterId: options.newsletterId
+                });
             }
         }
 
@@ -785,13 +785,6 @@ export default class EditorController extends Controller {
 
     // load supplementel data such as the members count in the background
     @restartableTask *backgroundLoaderTask() {
-        try {
-            let membersResponse = yield this.store.query('member', {limit: 1, filter: 'subscribed:true'});
-            this.set('memberCount', get(membersResponse, 'meta.pagination.total'));
-        } catch (error) {
-            this.set('memberCount', 0);
-        }
-
         yield this.store.query('snippet', {limit: 'all'});
     }
 
@@ -894,7 +887,7 @@ export default class EditorController extends Controller {
             }
             console.log('showing leave editor modal', this._leaveModalReason); // eslint-disable-line
 
-            const reallyLeave = await this.modals.open('modals/editor/confirm-leave');
+            const reallyLeave = await this.modals.open(ConfirmEditorLeaveModal);
 
             if (reallyLeave !== true) {
                 return;
@@ -1077,7 +1070,7 @@ export default class EditorController extends Controller {
         let description = emailOnly ? ['Will be sent'] : ['Will be published'];
 
         if (emailRecipientFilter && emailRecipientFilter !== 'none') {
-            const recipientCount = await this.membersCountCache.countString(`subscribed:true+(${emailRecipientFilter})`);
+            const recipientCount = await this.membersCountCache.countString(`newsletters.status:active+(${emailRecipientFilter})`);
             description.push(`${!emailOnly ? 'and delivered ' : ''}to <span><strong>${recipientCount}</strong></span>`);
         }
 

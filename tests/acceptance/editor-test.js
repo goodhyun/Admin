@@ -6,6 +6,9 @@ import {authenticateSession, invalidateSession} from 'ember-simple-auth/test-sup
 import {beforeEach, describe, it} from 'mocha';
 import {blur, click, currentRouteName, currentURL, fillIn, find, findAll, triggerEvent} from '@ember/test-helpers';
 import {datepickerSelect} from 'ember-power-datepicker/test-support';
+import {enableMailgun} from '../helpers/mailgun';
+import {enableNewsletters} from '../helpers/newsletters';
+import {enableStripe} from '../helpers/stripe';
 import {expect} from 'chai';
 import {selectChoose} from 'ember-power-select/test-support';
 import {setupApplicationTest} from 'ember-mocha';
@@ -832,6 +835,78 @@ describe('Acceptance: Editor', function () {
             let [lastRequest] = this.server.pretender.handledRequests.slice(-1);
             let body = JSON.parse(lastRequest.requestBody);
             expect(body.posts[0].title).to.equal('CMD-S Test');
+        });
+    });
+
+    describe('regressions', function () {
+        let user;
+
+        beforeEach(async function () {
+            const role = this.server.create('role', {name: 'Administrator'});
+            user = this.server.create('user', {roles: [role]});
+            this.server.loadFixtures('settings');
+            return await authenticateSession();
+        });
+
+        // BUG: opening the publish menu and selecting a scheduled time then
+        // closing prevents scheduling with a "Must be in the past" error
+        // when re-opening the menu
+        // https://github.com/TryGhost/Team/issues/1399
+        it('can close publish menu after selecting schedule then re-open, schedule, and publish without error', async function () {
+            const post = this.server.create('post', {status: 'draft', authors: [user]});
+
+            await visit(`/editor/post/${post.id}`);
+            await click('[data-test-publishmenu-trigger]');
+            await click('[data-test-publishmenu-scheduled-option]');
+            await click('[data-test-publishmenu-cancel]');
+            await click('[data-test-publishmenu-trigger]');
+            await click('[data-test-publishmenu-scheduled-option]');
+            await click('[data-test-publishmenu-save]');
+
+            expect(post.attrs.status).to.equal('scheduled');
+        });
+
+        // BUG: re-scheduling a send-only post unexpectedly switched to publish+send
+        // https://github.com/TryGhost/Ghost/issues/14354
+        it('can re-schedule an email-only post', async function () {
+            // Enable newsletters (extra confirmation step)
+            enableMailgun(this.server);
+            enableNewsletters(this.server, true);
+
+            // Enable stripe to also show paid members breakdown
+            enableStripe(this.server);
+
+            const newsletter = this.server.create('newsletter', {status: 'active'});
+            this.server.createList('member', 4, {status: 'free', newsletters: [newsletter]});
+            this.server.createList('member', 2, {status: 'paid', newsletters: [newsletter]});
+
+            const post = this.server.create('post', {status: 'draft', authors: [user]});
+
+            const scheduledTime = moment().add(2, 'hours');
+
+            await visit(`/editor/post/${post.id}`);
+            await click('[data-test-publishmenu-trigger]');
+            await selectChoose('[data-test-distribution-action-select]', 'send');
+            await click('[data-test-publishmenu-scheduled-option]');
+            await datepickerSelect('[data-test-publishmenu-draft] [data-test-date-time-picker-datepicker]', new Date(scheduledTime.format().replace(/\+.*$/, '')));
+            
+            // Expect 4 free and 2 paid recipients here
+            expect(find('[data-test-email-count="free-members"]')).to.contain.text('4');
+            expect(find('[data-test-email-count="paid-members"]')).to.contain.text('2');
+            
+            await click('[data-test-publishmenu-save]');
+            await click('[data-test-button="confirm-schedule"]');
+
+            expect(post.attrs.emailOnly).to.be.true;
+
+            await click('[data-test-publishmenu-trigger]');
+
+            expect(find('[data-test-publishmenu-header]')).to.contain.text('Will be sent');
+
+            await datepickerSelect('[data-test-publishmenu-scheduled] [data-test-date-time-picker-datepicker]', new Date(scheduledTime.add(1, 'day').format().replace(/\+.*$/, '')));
+            await click('[data-test-publishmenu-save]');
+
+            expect(post.attrs.emailOnly).to.be.true;
         });
     });
 });

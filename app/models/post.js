@@ -113,9 +113,13 @@ export default Model.extend(Comparable, ValidationEngine, {
     featureImageAlt: attr('string'),
     featureImageCaption: attr('string'),
 
+    // TODO: delete when newsletter relationship/embed is fully defined
+    newsletterId: attr(),
+
     authors: hasMany('user', {embedded: 'always', async: false}),
     createdBy: belongsTo('user', {async: true}),
     email: belongsTo('email', {async: false}),
+    newsletter: belongsTo('newsletter', {embedded: 'always', async: false}),
     publishedBy: belongsTo('user', {async: true}),
     tags: hasMany('tag', {embedded: 'always', async: false}),
 

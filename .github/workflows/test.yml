@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - "v4.*"
+      - "5.0"
+      - "multiple-newsletters"
       - main
       - "renovate/*"
 jobs:
@@ -12,8 +14,8 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'renovate/'))
     name: Production Build
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: "14.17.0"
 
@@ -31,8 +33,8 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && !startsWith(github.head_ref, 'renovate/'))
     name: Lint
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: "14.17.0"
 
@@ -59,8 +61,8 @@ jobs:
       CI: true
       COVERAGE: true
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: "14.17.0"
 
@@ -71,7 +73,7 @@ jobs:
 
       # Merge coverage reports and upload
       - run: yarn ember coverage-merge
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
 
       - uses: daniellockyer/action-slack-build@master
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'

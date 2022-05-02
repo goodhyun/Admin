@@ -1,4 +1,5 @@
 import AuthenticatedRoute from 'ghost-admin/routes/authenticated';
+import ConfirmUnsavedChangesModal from '../../../components/modals/confirm-unsaved-changes';
 import {action} from '@ember/object';
 import {inject as service} from '@ember/service';
 
@@ -20,7 +21,7 @@ export default class SettingsDesignIndexRoute extends AuthenticatedRoute {
         transition.abort();
 
         this.confirmUnsavedChanges().then((shouldLeave) => {
-            if (shouldLeave) {
+            if (shouldLeave === true) {
                 this.hasConfirmed = true;
                 return transition.retry();
             }
@@ -40,7 +41,7 @@ export default class SettingsDesignIndexRoute extends AuthenticatedRoute {
         }
 
         if (!this.confirmModal) {
-            this.confirmModal = this.modals.open('modals/confirm-unsaved-changes')
+            this.confirmModal = this.modals.open(ConfirmUnsavedChangesModal)
                 .then((discardChanges) => {
                     if (discardChanges === true) {
                         this.settings.rollbackAttributes();

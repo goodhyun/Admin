@@ -21,9 +21,10 @@ export default Model.extend(ValidationEngine, {
     emailOpenRate: attr('number'),
 
     products: attr('member-product'),
+    newsletters: hasMany('newsletter', {embedded: 'always', async: false}),
 
     labels: hasMany('label', {embedded: 'always', async: false}),
-    emailRecipients: hasMany('emailRecipient', {embedded: 'always', async: false}),
+    emailRecipients: hasMany('emailRecipient', {async: true}),
 
     ghostPaths: service(),
     ajax: service(),

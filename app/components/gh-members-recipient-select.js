@@ -75,8 +75,7 @@ export default class GhMembersRecipientSelect extends Component {
     }
 
     @action
-    toggleFilter(filter, event) {
-        event?.preventDefault();
+    toggleFilter(filter) {
         if (this.args.disabled) {
             return;
         }
@@ -88,8 +87,7 @@ export default class GhMembersRecipientSelect extends Component {
     }
 
     @action
-    toggleSpecificFilter(event) {
-        event?.preventDefault();
+    toggleSpecificFilter() {
         if (this.args.disabled) {
             return;
         }
@@ -205,10 +203,10 @@ export default class GhMembersRecipientSelect extends Component {
         }
 
         yield Promise.all([
-            this.store.query('member', {filter: 'subscribed:true+status:free', limit: 1}).then((res) => {
+            this.store.query('member', {filter: 'newsletters.status:active+status:free', limit: 1}).then((res) => {
                 this.freeMemberCount = res.meta.pagination.total;
             }),
-            this.store.query('member', {filter: 'subscribed:true+status:-free', limit: 1}).then((res) => {
+            this.store.query('member', {filter: 'newsletters.status:active+status:-free', limit: 1}).then((res) => {
                 this.paidMemberCount = res.meta.pagination.total;
             })
         ]);

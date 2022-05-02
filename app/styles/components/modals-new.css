@@ -52,6 +52,7 @@
     animation: var(--epm-animation-backdrop-in);
     animation-delay: var(--epm-animation-backdrop-in-delay);
     animation-duration: var(--epm-animation-backdrop-in-duration);
+    z-index: 10000;
 }
 
 .epm-modal-container {
@@ -59,6 +60,7 @@
     display: flex;
     justify-content: center;
     overflow: auto;
+    align-items: unset;
 }
 
 .epm-animating .epm-modal-container {
@@ -72,6 +74,7 @@
     animation-duration: var(--epm-animation-modal-in-duration);
     -webkit-overflow-scrolling: touch; /* momentum-based scrolling for Safari on iOS */
     pointer-events: none;
+    transform: none;
 }
 
 .epm-modal * {
@@ -99,6 +102,7 @@
     animation-delay: var(--epm-animation-modal-out-delay);
     animation-duration: var(--epm-animation-modal-out-duration);
     pointer-events: none;
+    transform: none;
 }
 
 @keyframes epm-backdrop-in {

@@ -22,6 +22,7 @@ export default class extends Component {
 
     @tracked showMemberProductModal = false;
     @tracked productsList;
+    @tracked newslettersList;
 
     get canShowStripeInfo() {
         return !this.member.get('isNew') && this.membersUtils.isStripeEnabled;
@@ -32,21 +33,48 @@ export default class extends Component {
             return false;
         }
 
-        let products = this.member.get('products');
-        if (products && products.length > 0) {
+        if (this.member.get('isNew')) {
             return false;
         }
 
-        if (this.feature.get('multipleProducts')) {
-            return !!this.productsList?.length;
+        if (this.member.get('products')?.length > 0) {
+            return false;
         }
 
-        return true;
+        // complimentary subscriptions are assigned to products so it only
+        // makes sense to show the "add complimentary" buttons when there's a
+        // product to assign the complimentary subscription to
+        const hasAnActivePaidProduct = !!this.productsList?.length;
+
+        return hasAnActivePaidProduct;
+    }
+
+    get hasSingleNewsletter() {
+        if (!this.feature.get('multipleNewsletters')) {
+            return true;
+        }
+        return this.newslettersList?.length === 1;
+    }
+
+    get hasMultipleNewsletters() {
+        return !!(this.feature.get('multipleNewsletters') && this.newslettersList?.length > 1);
+    }
+
+    get isCreatingComplimentary() {
+        return this.args.isSaveRunning;
     }
 
     get products() {
-        let products = this.member.get('products') || [];
         let subscriptions = this.member.get('subscriptions') || [];
+
+        // Create the products from `subscriptions.price.product`
+        let products = subscriptions
+            .map(subscription => (subscription.tier || subscription.price.product))
+            .filter((value, index, self) => {
+                // Deduplicate by taking the first object by `id`
+                return typeof value.id !== 'undefined' && self.findIndex(element => (element.product_id || element.id) === (value.product_id || value.id)) === index;
+            });
+
         let subscriptionData = subscriptions.filter((sub) => {
             return !!sub.price;
         }).map((sub) => {
@@ -63,18 +91,15 @@ export default class extends Component {
                 isComplimentary: !sub.id
             };
         });
-
-        for (let product of products) {
+        return products.map((product) => {
             let productSubscriptions = subscriptionData.filter((subscription) => {
-                if (subscription.status === 'canceled') {
-                    return false;
-                }
-                return subscription?.price?.product?.product_id === product.id;
+                return subscription?.price?.product?.product_id === (product.product_id || product.id);
             });
-            product.subscriptions = productSubscriptions;
-        }
-
-        return products;
+            return {
+                ...product,
+                subscriptions: productSubscriptions
+            };
+        });
     }
 
     get customer() {
@@ -95,12 +120,21 @@ export default class extends Component {
     }
 
     @action
-    setup() {
-        this.fetchProducts.perform();
+    updateNewsletterPreference(event) {
+        if (!event.target.checked) {
+            this.member.set('newsletters', []);
+        } else if (this.newslettersList.firstObject) {
+            const newsletter = this.newslettersList.firstObject;
+            this.member.set('newsletters', [newsletter]);
+        }
     }
 
-    get isCreatingComplimentary() {
-        return this.args.isSaveRunning;
+    @action
+    setup() {
+        this.fetchProducts.perform();
+        if (this.feature.get('multipleNewsletters')) {
+            this.fetchNewsletters.perform();
+        }
     }
 
     @action
@@ -111,6 +145,11 @@ export default class extends Component {
     @action
     setLabels(labels) {
         this.member.set('labels', labels);
+    }
+
+    @action
+    setMemberNewsletters(newsletters) {
+        this.member.set('newsletters', newsletters);
     }
 
     @action
@@ -133,12 +172,6 @@ export default class extends Component {
         this.continueSubscriptionTask.perform(subscriptionId);
     }
 
-    @action
-    addCompedSubscription() {
-        this.args.setProperty('comped', true);
-        this.args.saveMember();
-    }
-
     @task({drop: true})
     *cancelSubscriptionTask(subscriptionId) {
         let url = this.ghostPaths.url.api('members', this.member.get('id'), 'subscriptions', subscriptionId);
@@ -157,7 +190,10 @@ export default class extends Component {
     *removeComplimentaryTask(productId) {
         let url = this.ghostPaths.url.api(`members/${this.member.get('id')}`);
         let products = this.member.get('products') || [];
-        const updatedProducts = products.filter(product => product.id !== productId).map(product => ({id: product.id}));
+
+        const updatedProducts = products
+            .filter(product => product.id !== productId)
+            .map(product => ({id: product.id}));
 
         let response = yield this.ajax.put(url, {
             data: {
@@ -190,5 +226,16 @@ export default class extends Component {
     @task({drop: true})
     *fetchProducts() {
         this.productsList = yield this.store.query('product', {filter: 'type:paid+active:true', include: 'monthly_price,yearly_price'});
+    }
+
+    @task({drop: true})
+    *fetchNewsletters() {
+        this.newslettersList = yield this.store.query('newsletter', {filter: 'status:active'});
+        if (this.member.get('isNew')) {
+            const defaultNewsletters = this.newslettersList.filter((newsletter) => {
+                return newsletter.subscribeOnSignup && newsletter.visibility === 'members';
+            });
+            this.setMemberNewsletters(defaultNewsletters);
+        }
     }
 }

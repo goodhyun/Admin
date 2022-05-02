@@ -881,6 +881,229 @@
 }
 
 
+/* Email newsletter LABS
+/* ---------------------------------------------------------- */
+
+.gh-newsletters .gh-dropdown-archived {
+    color: var(--darkgrey);
+    font-size: 1.35rem;
+    font-weight: 400;
+}
+
+.gh-newsletters .gh-expandable-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--black);
+    margin: 0;
+    padding: 0;
+}
+
+.gh-newsletters .gh-expandable-description {
+    margin: 0 0 1.8rem;
+    padding: 0;
+    color: var(--midgrey);
+    font-size: 1.3rem;
+    font-weight: 400;
+}
+
+.gh-newsletters .gh-expandable-block {
+    padding: 24px;
+}
+
+.gh-newsletters .gh-main-content-card:last-of-type {
+    margin-bottom: 0;
+}
+
+.gh-newsletter-card {
+    position:relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: margin 125ms ease-in-out, padding 125ms ease-in-out;
+}
+
+.gh-newsletter-card[draggable="true"] {
+    /* required to avoid background being picked up when dragging */
+    z-index: 1;
+}
+
+.gh-newsletter-card-draggable:hover {
+    margin-left: 4px;
+    padding-left: 20px;
+}
+.gh-newsletter-card .grab-newsletter {
+    display: none;
+}
+.gh-newsletter-card-draggable .grab-newsletter {
+    display: inline-block;
+}
+
+@media (max-width: 980px) {
+    .gh-newsletter-card {
+        padding: 4vmin 48px;
+    }
+}
+
+.gh-newsletter-card .grab-newsletter {
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: -20px;
+    width: 2rem;
+    height: 100%;
+    padding-right: 2px;
+    fill: var(--lightgrey-d2);
+    cursor: move;
+    opacity: 0;
+    transition: visibility 0s, opacity 200ms ease-in-out;
+}
+
+.gh-newsletter-card.multiple:hover .grab-newsletter {
+    visibility: visible;
+    opacity: 1;
+}
+
+.gh-newsletter-card-block.title-block {
+    flex-basis: 60%;
+}
+
+.gh-newsletter-card-block.stats-block {
+    display: grid;
+    flex-basis: 30%;
+    grid-template-columns: 1fr 1fr;
+}
+
+.gh-newsletter-card-block.stats-block.multiple {
+    margin-right: -4.4rem;
+}
+
+.gh-newsletter-card-block.cta-block {
+    display: flex;
+}
+
+.gh-newsletter-card-block:not(:first-of-type) {
+    padding-left: 16px;
+}
+
+.gh-newsletter-card-block h4 {
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.gh-newsletter-card-block h4 .counter {
+    font-weight: 400;
+    color: var(--midgrey);
+}
+
+.gh-newsletter-card-name {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    line-height: 1.3em;
+}
+
+.stats-block .gh-newsletter-card-name {
+    font-size: 1.7rem;
+}
+
+.gh-newsletter-card-description {
+    font-size: 1.3rem;
+    line-height: 1.45em;
+    margin: 4px 20px 4px 0;
+    color: var(--midgrey);
+}
+
+.gh-newsletter-card-button-container {
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    margin-right: 0;
+}
+
+.gh-newsletter-actions-menu {
+    margin-top: 4px;
+}
+
+.gh-add-newsletter {
+    width: max-content;
+    margin: .8rem 0 0;
+    color: var(--green-d1);
+}
+
+.gh-add-newsletter svg {
+    width: 1rem;
+    height: 1rem;
+    margin: 1px 4px 0 0;
+}
+
+.gh-add-newsletter svg path {
+    stroke: var(--green-d1);
+    stroke-width: 3;
+}
+
+.gh-newsletters-setting-sectionheading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    color: var(--midgrey-l1);
+    margin: 0 0 16px;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--whitegrey);
+}
+
+.gh-newsletters-labs .form-group.vertical p {
+    margin: 4px 0 0;
+}
+
+.gh-newsletters-labs .modal-fullsettings-uploader {
+    flex-grow: 1;
+    margin: 0;
+}
+
+.gh-newsletters-labs .gh-header-img-uploadicon {
+    background: var(--whitegrey-l2);
+}
+
+.gh-newsletters-labs .gh-email-design-typography-wrapper.header .gh-btn-group {
+    background: var(--whitegrey-d1);
+}
+
+.gh-newsletters-labs .gh-stack-item .tooltip-top-left::before {
+    width: max-content;
+    max-width: 320px;
+    white-space: normal;
+    word-break: break-word;
+    text-align: left;
+}
+
+.gh-newsletters-labs .gh-members-emailsettings-footer {
+    margin-top: auto;
+    margin-bottom: 0;
+}
+
+.gh-newsletters-labs .gh-members-emailpreview-container {
+    margin: 16px auto 32px;
+}
+
+.gh-newsletters-labs .gh-members-emailpreview-faux {
+    height: 88px;
+    background: var(--whitegrey-l2);
+}
+
+.gh-newsletters-labs .gh-members-emailpreview-faux .dark,
+.gh-newsletters-labs .gh-members-emailpreview-faux .strong {
+    color: var(--darkgrey);
+    font-size: 1.4rem;
+    font-weight: 600;   
+}
+
+.gh-newsletters-labs .gh-members-emailpreview-faux p {
+    color: var(--midgrey-l2);
+}
+
 /* Code injection
 /* ---------------------------------------------------------- */
 
@@ -1513,7 +1736,6 @@ p.theme-validation-details {
     color: var(--darkgrey-l1);
     font-weight: 400;
     font-size: 1.45rem;
-    border-radius: var(--border-radius);
     transition: none;
 }
 
@@ -1598,7 +1820,7 @@ p.theme-validation-details {
 .gh-nav-design .gh-nav-bottom::after {
     bottom: 72px;
     box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 -8px 16px -3px rgba(0,0,0,.15);
-  }
+}
 
 .gh-change-theme {
     position: sticky;
@@ -1636,7 +1858,6 @@ p.theme-validation-details {
     margin: 8px 0 24px;
     padding: 24px var(--main-layout-area-padding) 16px;
     background: var(--mainmenu-color-hover-bg);
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
 
 .gh-nav-design .gh-setting {
@@ -1738,13 +1959,13 @@ p.theme-validation-details {
     height: 100%;
 }
 
-.gh-design-page-preview-mode,
-.gh-design-page-preview-mode select {
+.gh-preview-page-selector,
+.gh-preview-page-selector select {
     height: 34px;
-    min-width: 128px;
+    min-width: 160px;
 }
 
-.gh-design-page-preview-mode svg {
+.gh-preview-page-selector svg {
     margin-top: -.1em;
 }
 
@@ -2095,6 +2316,14 @@ p.theme-validation-details {
 
 .gh-setting-richdd-container {
     margin: 36px 0;
+}
+
+.gh-expandable-content .gh-setting-richdd-container {
+    margin: 0 0 30px;
+}
+
+.gh-expandable-content .gh-setting-richdd-container .gh-setting-dropdown {
+    margin-top: 0;
 }
 
 .gh-setting-large-dropdown .ember-power-select-multiple-trigger {

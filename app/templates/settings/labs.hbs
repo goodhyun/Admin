@@ -82,23 +82,6 @@
         <div class="gh-main-section">
             <h4 class="gh-main-section-header small bn">Beta features</h4>
             <div class="gh-expandable">
-
-                <div class="gh-expandable-block">
-                    <div class="gh-expandable-header">
-                        <div>
-                            <h4 class="gh-expandable-title">Tiers</h4>
-                            <p class="gh-expandable-description">
-                                Add additional tiers to your paid memberships (e.g. Bronze, Silver, Gold). <a href="http://ghost.org/help/tiers" target="_blank" rel="noopener noreferrer">Learn more here</a>
-                            </p>
-                        </div>
-                        {{#if (feature "multipleProducts")}}
-                            <span class="gh-badge">Enabled</span>
-                        {{else}}
-                            <button type="button" class="gh-btn" {{action "toggleEnableTiersModal"}}><span>Enable</span></button>
-                        {{/if}}
-                    </div>
-                </div>
-
                 <div class="gh-expandable-block">
                     <GhUploader
                         @extensions={{this.redirectsFileExtensions}}
@@ -303,19 +286,6 @@
                 <div class="gh-expandable-block">
                     <div class="gh-expandable-header">
                         <div>
-                            <h4 class="gh-expandable-title">Members activity feed</h4>
-                            <p class="gh-expandable-description">
-                               Separate activity feed screen showing all member activity.
-                            </p>
-                        </div>
-                        <div class="for-switch">
-                           <GhFeatureFlag @flag="membersActivityFeed" />
-                        </div>
-                    </div>
-                </div>
-                <div class="gh-expandable-block">
-                    <div class="gh-expandable-header">
-                        <div>
                             <h4 class="gh-expandable-title">Improved onboarding flow</h4>
                             <p class="gh-expandable-description">
                                 Various tweaks to streamline the site creation and getting started flows.
@@ -326,6 +296,58 @@
                         </div>
                     </div>
                 </div>
+                <div class="gh-expandable-block">
+                    <div class="gh-expandable-header">
+                        <div>
+                            <h4 class="gh-expandable-title">Multiple newsletters</h4>
+                            <p class="gh-expandable-description">
+                                Manage and send multiple newsletter lists
+                            </p>
+                        </div>
+                        <div class="for-switch">
+                           <GhFeatureFlag @flag="multipleNewsletters" />
+                        </div>
+                    </div>
+                </div>
+                <div class="gh-expandable-block">
+                    <div class="gh-expandable-header">
+                        <div>
+                            <h4 class="gh-expandable-title">Multiple newsletters UI</h4>
+                            <p class="gh-expandable-description">
+                                Enables creating multiple newsletters
+                            </p>
+                        </div>
+                        <div class="for-switch">
+                           <GhFeatureFlag @flag="multipleNewslettersUI" />
+                        </div>
+                    </div>
+                </div>
+                <div class="gh-expandable-block">
+                     <div class="gh-expandable-header">
+                         <div>
+                             <h4 class="gh-expandable-title">Dashboard 5.0</h4>
+                             <p class="gh-expandable-description">
+                                Increased amount of analytics with more useful / dynamic resources
+                             </p>
+                         </div>
+                         <div class="for-switch">
+                            <GhFeatureFlag @flag="dashboardV5" />
+                         </div>
+                     </div>
+                 </div>
+                 <div class="gh-expandable-block">
+                     <div class="gh-expandable-header">
+                         <div>
+                             <h4 class="gh-expandable-title">Publishing flow</h4>
+                             <p class="gh-expandable-description">
+                                Revised workflow experience when publishing/scheduling/sending
+                             </p>
+                         </div>
+                         <div class="for-switch">
+                            <GhFeatureFlag @flag="publishingFlow" />
+                         </div>
+                     </div>
+                 </div>
             </div>
         </div>
         {{/if}}

@@ -18,6 +18,7 @@
             <GhPublishmenuScheduled
                 @post={{this.post}}
                 @saveType={{this.saveType}}
+                @emailOnly={{this.emailOnly}}
                 @isClosing={{this.isClosing}}
                 @canSendEmail={{this.canSendEmail}}
                 @recipientsFilter={{this.sendEmailWhenPublished}}
@@ -25,6 +26,7 @@
                 @setTypedDateError={{action (mut this.typedDateError)}}
                 @isSendingEmailLimited={{this.isSendingEmailLimited}}
                 @sendingEmailLimitError={{this.sendingEmailLimitError}}
+                @availableNewsletters={{this.availableNewsletters}}
                 data-test-publishmenu-scheduled="true" />
 
         {{else}}
@@ -41,6 +43,9 @@
                 @sendingEmailLimitError={{this.sendingEmailLimitError}}
                 @distributionAction={{this.distributionAction}}
                 @setDistributionAction={{action "setDistributionAction"}}
+                @availableNewsletters={{this.availableNewsletters}}
+                @selectedNewsletter={{this.selectedNewsletter}}
+                @selectNewsletter={{this.selectNewsletter}}
                 data-test-publishmenu-draft="true" />
         {{/if}}
 

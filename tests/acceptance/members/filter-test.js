@@ -4,6 +4,8 @@ import {authenticateSession} from 'ember-simple-auth/test-support';
 import {blur, click, currentURL, fillIn, find, findAll, focus} from '@ember/test-helpers';
 import {datepickerSelect} from 'ember-power-datepicker/test-support';
 import {enableLabsFlag} from '../../helpers/labs-flag';
+import {enableNewsletters} from '../../helpers/newsletters';
+import {enableStripe} from '../../helpers/stripe';
 import {expect} from 'chai';
 import {selectChoose} from 'ember-power-select/test-support/helpers';
 import {setupApplicationTest} from 'ember-mocha';
@@ -20,16 +22,8 @@ describe('Acceptance: Members filtering', function () {
         this.server.loadFixtures('configs');
         this.server.loadFixtures('settings');
         enableLabsFlag(this.server, 'multipleProducts');
-
-        // test with stripe connected and email turned on
-        // TODO: add these settings to default fixtures
-        this.server.db.settings.find({key: 'stripe_connect_account_id'})
-            ? this.server.db.settings.update({key: 'stripe_connect_account_id'}, {value: 'stripe_connected'})
-            : this.server.create('setting', {key: 'stripe_connect_account_id', value: 'stripe_connected', group: 'members'});
-
-        this.server.db.settings.find({key: 'editor_default_email_recipients'})
-            ? this.server.db.settings.update({key: 'editor_default_email_recipients'}, {value: 'visibility'})
-            : this.server.create('setting', {key: 'editor_default_email_recipients', value: 'visibility', group: 'editor'});
+        enableStripe(this.server);
+        enableNewsletters(this.server, true);
 
         let role = this.server.create('role', {name: 'Owner'});
         this.server.create('user', {roles: [role]});
@@ -121,14 +115,15 @@ describe('Acceptance: Members filtering', function () {
 
         it('can filter by tier', async function () {
             // add some labels to test the selection dropdown
+            const newsletter = this.server.create('newsletter', {status: 'active'});
             this.server.createList('product', 4);
 
             // add a labelled member so we can test the filter includes correctly
             const product = this.server.create('product');
-            this.server.createList('member', 3, {products: [product]});
+            this.server.createList('member', 3, {products: [product], newsletters: [newsletter]});
 
             // add some non-labelled members so we can see the filter excludes correctly
-            this.server.createList('member', 4);
+            this.server.createList('member', 4, {newsletters: [newsletter]});
 
             await visit('/members');
 
@@ -265,8 +260,8 @@ describe('Acceptance: Members filtering', function () {
 
         it('can filter by billing period', async function () {
             // add some members to filter
-            this.server.createList('member', 3, {subscriptions: [{plan_interval: 'month'}]});
-            this.server.createList('member', 4, {subscriptions: [{plan_interval: 'year'}]});
+            this.server.createList('member', 3).forEach(member => this.server.create('subscription', {member, planInterval: 'month'}));
+            this.server.createList('member', 4).forEach(member => this.server.create('subscription', {member, planInterval: 'year'}));
 
             await visit('/members');
 
@@ -310,8 +305,8 @@ describe('Acceptance: Members filtering', function () {
 
         it('can filter by stripe subscription status', async function () {
             // add some members to filter
-            this.server.createList('member', 3, {subscriptions: [{status: 'active'}]});
-            this.server.createList('member', 4, {subscriptions: [{status: 'trialing'}]});
+            this.server.createList('member', 3).forEach(member => this.server.create('subscription', {member, status: 'active'}));
+            this.server.createList('member', 4).forEach(member => this.server.create('subscription', {member, status: 'trialing'}));
 
             await visit('/members');
 
@@ -519,6 +514,10 @@ describe('Acceptance: Members filtering', function () {
             await fillIn(operatorSelector, 'is-greater');
             expect(findAll('[data-test-list="members-list-item"]').length, '# of filtered member rows - operator is-greater')
                 .to.equal(4);
+
+            // it does not add duplicate column
+            expect(find('[data-test-table-column="email_open_rate"]')).to.exist;
+            expect(findAll('[data-test-table-column="email_open_rate"]').length).to.equal(1);
 
             // can clear filter
             await fillIn(valueInput, '');
@@ -760,9 +759,9 @@ describe('Acceptance: Members filtering', function () {
             });
 
             // add some members to filter
-            this.server.createList('member', 3, {subscriptions: [{start_date: moment('2022-02-01 12:00:00').format('YYYY-MM-DD HH:mm:ss')}]});
-            this.server.createList('member', 4, {subscriptions: [{start_date: moment('2022-02-05 12:00:00').format('YYYY-MM-DD HH:mm:ss')}]});
-            this.server.createList('member', 2, {subscriptions: []});
+            this.server.createList('member', 3).forEach(member => this.server.create('subscription', {member, startDate: moment('2022-02-01 12:00:00').format('YYYY-MM-DD HH:mm:ss')}));
+            this.server.createList('member', 4).forEach(member => this.server.create('subscription', {member, startDate: moment('2022-02-05 12:00:00').format('YYYY-MM-DD HH:mm:ss')}));
+            this.server.createList('member', 2);
 
             await visit('/members');
 
@@ -1081,9 +1080,9 @@ describe('Acceptance: Members filtering', function () {
             });
 
             // add some members to filter
-            this.server.createList('member', 3, {subscriptions: [{current_period_end: moment('2022-02-01 12:00:00').format('YYYY-MM-DD HH:mm:ss')}]});
-            this.server.createList('member', 4, {subscriptions: [{current_period_end: moment('2022-02-05 12:00:00').format('YYYY-MM-DD HH:mm:ss')}]});
-            this.server.createList('member', 2, {subscriptions: []});
+            this.server.createList('member', 3).forEach(member => this.server.create('subscription', {member, currentPeriodEnd: moment('2022-02-01 12:00:00').format('YYYY-MM-DD HH:mm:ss')}));
+            this.server.createList('member', 4).forEach(member => this.server.create('subscription', {member, currentPeriodEnd: moment('2022-02-05 12:00:00').format('YYYY-MM-DD HH:mm:ss')}));
+            this.server.createList('member', 2);
 
             await visit('/members');
 
@@ -1156,9 +1155,9 @@ describe('Acceptance: Members filtering', function () {
 
         it('can handle multiple filters', async function () {
             // add some members to filter
-            this.server.createList('member', 1, {subscriptions: [{status: 'active'}]});
-            this.server.createList('member', 2, {subscriptions: [{status: 'trialing'}]});
-            this.server.createList('member', 3, {emailOpenRate: 50, subscriptions: [{status: 'trialing'}]});
+            this.server.createList('member', 1).forEach(member => this.server.create('subscription', {member, status: 'active'}));
+            this.server.createList('member', 2).forEach(member => this.server.create('subscription', {member, status: 'trialing'}));
+            this.server.createList('member', 3, {emailOpenRate: 50}).forEach(member => this.server.create('subscription', {member, status: 'trialing'}));
             this.server.createList('member', 4, {emailOpenRate: 100});
 
             await visit('/members');
@@ -1212,7 +1211,7 @@ describe('Acceptance: Members filtering', function () {
         });
 
         it('has a no-match state', async function () {
-            this.server.createList('member', 5, {subscriptions: [{status: 'active'}]});
+            this.server.createList('member', 5).forEach(member => this.server.create('subscription', {member, status: 'active'}));
 
             await visit('/members');
 
@@ -1255,7 +1254,7 @@ describe('Acceptance: Members filtering', function () {
             // meaning you could have an "is-greater" operator applied to an
             // "is/is-not" filter type
 
-            this.server.createList('member', 3, {subscriptions: [{status: 'active'}]});
+            this.server.createList('member', 3).forEach(member => this.server.create('subscription', {member, status: 'active'}));
             this.server.createList('member', 4, {emailCount: 10});
 
             await visit('/members');
@@ -1410,7 +1409,7 @@ describe('Acceptance: Members filtering', function () {
         });
 
         it('can search + filter', async function () {
-            this.server.create('member', {name: 'A', email: 'a@aaa.aaa', subscriptions: [{status: 'active'}]});
+            this.server.create('member', {name: 'A', email: 'a@aaa.aaa', subscriptions: [this.server.create('subscription', {status: 'active'})]});
 
             await visit('/members');
 
