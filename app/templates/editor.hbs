@@ -113,7 +113,12 @@
             />
         {{/if}}
     </div>
-
+<hr>
+<KoenigEditor 
+    @onChange={{action "updateScratch2"}}
+    @mobiledoc={{readonly this.post.scratch2}}
+/>
+<hr>
     <button type="button" class="settings-menu-toggle gh-btn gh-btn-editor gh-btn-icon icon-only gh-btn-action-icon" title="Settings" {{on "click" this.toggleSettingsMenu}} data-test-psm-trigger>
         {{#if this.showSettingsMenu}}
             <span class="settings-menu-open">{{svg-jar "sidemenu-open"}}</span>

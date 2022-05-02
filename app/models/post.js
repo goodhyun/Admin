@@ -91,10 +91,12 @@ export default Model.extend(Comparable, ValidationEngine, {
     twitterDescription: attr('string'),
     emailSubject: attr('string'),
     html: attr('string'),
+    html2: attr('string'),
     visibility: attr('string'),
     metaDescription: attr('string'),
     metaTitle: attr('string'),
     mobiledoc: attr('json-string', {defaultValue: () => JSON.parse(JSON.stringify(BLANK_DOC))}),
+    mobiledoc2: attr('json-string', {defaultValue: () => JSON.parse(JSON.stringify(BLANK_DOC))}),
     plaintext: attr('string'),
     publishedAtUTC: attr('moment-utc'),
     slug: attr('string'),
@@ -121,6 +123,7 @@ export default Model.extend(Comparable, ValidationEngine, {
     primaryTag: reads('tags.firstObject'),
 
     scratch: null,
+    scratch2: null,
     titleScratch: null,
 
     // HACK: used for validation so that date/time can be validated based on

@@ -26,6 +26,7 @@ const TIMEDSAVE_TIMEOUT = 60000;
 // this array will hold properties we need to watch for this.hasDirtyAttributes
 let watchedProps = [
     'post.scratch',
+    'post.scratch2',
     'post.titleScratch',
     'post.hasDirtyAttributes',
     'post.tags.[]',
@@ -191,6 +192,16 @@ export default class EditorController extends Controller {
     @action
     updateScratch(mobiledoc) {
         this.set('post.scratch', mobiledoc);
+
+        // save 3 seconds after last edit
+        this._autosaveTask.perform();
+        // force save at 60 seconds
+        this._timedSaveTask.perform();
+    }
+
+    @action
+    updateScratch2(mobiledoc) {
+        this.set('post.scratch2', mobiledoc);
 
         // save 3 seconds after last edit
         this._autosaveTask.perform();
@@ -509,6 +520,7 @@ export default class EditorController extends Controller {
         // nested objects/arrays don't keep references which can mean that both
         // scratch and mobiledoc get updated simultaneously
         this.set('post.mobiledoc', JSON.parse(JSON.stringify(this.post.scratch || null)));
+        this.set('post.mobiledoc2', JSON.parse(JSON.stringify(this.post.scratch2 || null)));
         this.set('post.status', status);
 
         // Set a default title
@@ -807,6 +819,7 @@ export default class EditorController extends Controller {
         // TODO: can these be `boundOneWay` on the model as per the other attrs?
         post.set('titleScratch', post.get('title'));
         post.set('scratch', post.get('mobiledoc'));
+        post.set('scratch2', post.get('mobiledoc2'));
 
         this._previousTagNames = this._tagNames;
 
