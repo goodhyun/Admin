@@ -31,6 +31,12 @@
     margin: 0 -4px;
 }
 
+.no-posts .gh-members-placeholder {
+    fill: var(--lightgrey);
+    width: 60px;
+    height: 60px;
+}
+
 .gh-member-details-activity h3 {
     margin: 0 0 2px;
     padding: 0;
@@ -46,7 +52,7 @@
     margin: 0;
     padding: 0;
     font-size: 1.4rem;
-    color: #40474f;
+    color: var(--darkgrey-l1);
 }
 
 .gh-member-details-activity-link {
@@ -119,13 +125,8 @@
 
 .gh-members-activity-description {
     display: inline-block;
-    text-transform: lowercase;
     color: var(--middarkgrey);
     font-weight: 500;
-}
-
-.gh-members-activity-description:first-letter {
-    text-transform: uppercase;
 }
 
 .gh-members-activity-icon {
@@ -201,7 +202,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    color: #394047;
+    color: var(--darkgrey);
     font-weight: 500;
     font-size: 1.4rem;
     padding: 0.125rem 6rem 0 0.25rem;

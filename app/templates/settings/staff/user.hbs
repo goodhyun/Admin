@@ -292,10 +292,35 @@
                             />
                             <GhErrorMessage @errors={{this.user.errors}} @property="bio" data-test-error="user-bio" />
                             <p>
-                                Recommended: <strong>200</strong> characters. 
+                                Recommended: <strong>200</strong> characters.
                                 You've used {{gh-count-down-characters this.user.bio 200}}
                             </p>
                         </GhFormGroup>
+
+                        {{#if (feature 'comments')}}
+                        <h4 class="user-settings-heading">Email notifications</h4>
+                        <GhFormGroup @errors={{this.user.errors}} @hasValidated={{this.user.hasValidated}} @property="email">
+                            <div class="user-setting-toggle">
+                                <div>
+                                    <label for="user-email">Comments</label>
+                                    <p>Send notifications on members commenting on your posts</p>
+                                </div>
+                                <div class="for-switch">
+                                    <label class="switch" for="comment-notifications">
+                                        <input
+                                            id="comment-notifications"
+                                            type="checkbox"
+                                            checked={{this.user.commentNotifications}}
+                                            class="gh-input"
+                                            {{on "change" this.toggleCommentNotifications}}
+                                            data-test-checkbox="comment-notifications"
+                                        >
+                                        <span class="input-toggle-component"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </GhFormGroup>
+                        {{/if}}
 
                     </fieldset>
                 </div>

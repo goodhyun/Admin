@@ -35,6 +35,7 @@ export default BaseModel.extend(ValidationEngine, {
     facebook: attr('facebook-url-user'),
     twitter: attr('twitter-url-user'),
     tour: attr('json-string'),
+    commentNotifications: attr(),
 
     ghostPaths: service(),
     ajax: service(),
@@ -53,8 +54,6 @@ export default BaseModel.extend(ValidationEngine, {
     // These are used in enough places that it's useful to throw them here
     isAdmin: or('isOwnerOnly', 'isAdminOnly'),
     isAuthorOrContributor: or('isAuthor', 'isContributor'),
-
-    canEmail: or('isAdmin', 'isEditor'),
 
     isLoggedIn: computed('id', 'session.user.id', function () {
         return this.id === this.get('session.user.id');

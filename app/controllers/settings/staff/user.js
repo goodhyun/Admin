@@ -4,8 +4,8 @@ import copyTextToClipboard from 'ghost-admin/utils/copy-text-to-clipboard';
 import isNumber from 'ghost-admin/utils/isNumber';
 import validator from 'validator';
 import windowProxy from 'ghost-admin/utils/window-proxy';
+import {action, computed} from '@ember/object';
 import {alias, and, not, or, readOnly} from '@ember/object/computed';
-import {computed} from '@ember/object';
 import {isArray as isEmberArray} from '@ember/array';
 import {run} from '@ember/runloop';
 import {inject as service} from '@ember/service';
@@ -381,20 +381,13 @@ export default Controller.extend({
         }
     },
 
-    _exportDb(filename) {
-        this.utils.downloadFile(`${this.ghostPaths.url.api('db')}?filename=${filename}`);
-    },
+    toggleCommentNotifications: action(function (event) {
+        this.user.commentNotifications = event.target.checked;
+    }),
 
     deleteUser: task(function *() {
         try {
-            const result = yield this.user.destroyRecord();
-
-            if (result._meta && result._meta.filename) {
-                this._exportDb(result._meta.filename);
-                // give the iframe some time to trigger the download before
-                // it's removed from the dom when transitioning
-                yield timeout(300);
-            }
+            yield this.user.destroyRecord();
 
             this.notifications.closeAlerts('user.delete');
             this.store.unloadAll('post');

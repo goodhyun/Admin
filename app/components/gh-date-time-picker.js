@@ -119,7 +119,7 @@ export default class GhDateTimePicker extends Component {
         }
         this.set('_previousTime', this._time);
 
-        // unless min/max date is at midnight moment will diable that day
+        // unless min/max date is at midnight moment will disable that day
         if (minDate === 'now') {
             this.set('_minDate', moment(moment().format(DATE_FORMAT)));
         } else if (!isBlank(minDate)) {
@@ -156,13 +156,13 @@ export default class GhDateTimePicker extends Component {
     }
 
     @action
-    setTimeInternal(time) {
+    setTimeInternal(time, event) {
         if (time.match(/^\d:\d\d$/)) {
             time = `0${time}`;
         }
 
         if (time !== this._previousTime) {
-            this.setTime(time);
+            this.setTime(time, event);
             this.set('_previousTime', time);
 
             if (isBlank(this.date)) {
